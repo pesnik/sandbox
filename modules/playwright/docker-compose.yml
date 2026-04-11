@@ -1,0 +1,55 @@
+# modules/playwright — @playwright/mcp as a sandbox module
+#
+# Provides browser automation tools via MCP (streamable-HTTP on port 8080).
+# Browser profile is persisted in the `playwright-profile` volume so auth
+# (e.g. Outlook login) survives container restarts and Daytona snapshots.
+#
+# Usage:
+#   docker compose \
+#     -f docker-compose.yml \
+#     -f modules/playwright/docker-compose.yml \
+#     up -d
+#
+# Agent access (via sandbox nginx gateway):
+#   http://localhost:8080/modules/playwright/mcp
+#
+# First login (headed mode — open VNC to see the browser):
+#   docker exec -it playwright bash
+#   # then use sandbox MCP shell_execute to drive it, or connect via noVNC
+
+services:
+  playwright:
+    image: mcr.microsoft.com/playwright/mcp:latest
+    container_name: playwright
+    command:
+      - "--port"
+      - "8080"
+      - "--browser"
+      - "chromium"
+      - "--user-data-dir"
+      - "/home/pwuser/.playwright/profile"
+    environment:
+      # headed: set to false for headless automation after first manual login
+      - PLAYWRIGHT_MCP_HEADED=${PLAYWRIGHT_HEADED:-false}
+    volumes:
+      # Browser profile: cookies, localStorage, saved sessions
+      # This volume is what you snapshot in Daytona to bake in Outlook auth
+      - playwright-profile:/home/pwuser/.playwright
+    networks:
+      - sandbox-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/mcp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  playwright-profile:
+    name: playwright-profile
+
+networks:
+  sandbox-net:
+    external: true
+    name: sandbox-net

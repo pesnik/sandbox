@@ -1,0 +1,21 @@
+# Org overlay — private scripts, vault.env, secrets
+org/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Environment files
+.env
+.env.*
+!.env.schema
+
+# Editor
+.DS_Store
+*.swp
+.idea/
+.vscode/settings.json

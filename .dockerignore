@@ -1,0 +1,12 @@
+**/.env*
+**/__pycache__
+**/*.pyc
+**/.git
+**/node_modules
+org/
+tests/
+sdk/
+modules/
+.devcontainer/
+.claude/
+*.md

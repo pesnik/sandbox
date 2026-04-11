@@ -1,12 +1,10 @@
-FROM ubuntu:22.04
+FROM python:3.12-slim
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    HOME=/root \
-    LANG=en_US.UTF-8 \
-    LC_ALL=en_US.UTF-8 \
-    PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1 \
+    HOME=/root
 
-# Base system packages — no VNC, no desktop, no browser
+# System packages only — Python already in base image
+# Vault is NOT here: org overlay installs it via org/scripts/install-vault.sh
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
     supervisor \
@@ -14,27 +12,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     git \
     ca-certificates \
-    python3 \
-    python3-pip \
-    locales \
-    gnupg \
-    lsb-release \
-    && locale-gen en_US.UTF-8 \
+    unzip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# HashiCorp Vault CLI (for org overlay vault.env support)
-RUN wget -O- https://apt.releases.hashicorp.com/gpg \
-      | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
-      https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
-      | tee /etc/apt/sources.list.d/hashicorp.list && \
-    apt-get update && apt-get install -y --no-install-recommends vault && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Python dependencies — install before copying app code for layer caching
+# Python dependencies — layer-cached before app code
 COPY api/requirements.txt /tmp/api-requirements.txt
 COPY mcp/requirements.txt /tmp/mcp-requirements.txt
-RUN pip3 install --no-cache-dir \
+RUN pip install --no-cache-dir \
     -r /tmp/api-requirements.txt \
     -r /tmp/mcp-requirements.txt
 
@@ -44,7 +28,8 @@ RUN mkdir -p \
     /var/log/supervisor \
     /sandbox/modules/enabled \
     /opt/sandbox/api \
-    /opt/sandbox/mcp
+    /opt/sandbox/mcp \
+    /root/.local/bin
 
 # supervisord
 COPY supervisord/supervisord.conf /etc/supervisor/supervisord.conf
@@ -63,7 +48,6 @@ COPY mcp/ /opt/sandbox/mcp/
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# REST API + MCP direct ports, nginx on 8080
 EXPOSE 8080 8079 8091
 
 ENTRYPOINT ["/entrypoint.sh"]

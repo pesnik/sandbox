@@ -10,7 +10,6 @@ from __future__ import annotations
 import asyncio
 import os
 import shutil
-import subprocess
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
@@ -74,13 +73,16 @@ def register(mcp: FastMCP) -> None:
                 if f.endswith(".conf") and f not in builtin_confs
             ]
 
-        # OS release
+        # OS release — read /etc/os-release directly (no lsb_release needed)
+        os_release = "unknown"
         try:
-            os_release = subprocess.check_output(
-                ["lsb_release", "-ds"], text=True, timeout=3
-            ).strip()
-        except Exception:
-            os_release = "unknown"
+            with open("/etc/os-release") as f:
+                for line in f:
+                    if line.startswith("PRETTY_NAME="):
+                        os_release = line.split("=", 1)[1].strip().strip('"')
+                        break
+        except OSError:
+            pass
 
         return {
             "image": "pesnik/sandbox",

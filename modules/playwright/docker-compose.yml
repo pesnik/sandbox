@@ -22,6 +22,10 @@ services:
     image: mcr.microsoft.com/playwright/mcp:latest
     container_name: playwright
     command:
+      - "--host"
+      - "0.0.0.0"
+      - "--allowed-hosts"
+      - "*"
       - "--port"
       - "8080"
       - "--browser"

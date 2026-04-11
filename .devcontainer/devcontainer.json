@@ -1,0 +1,15 @@
+{
+  "name": "sandbox",
+  "image": "ghcr.io/pesnik/sandbox:latest",
+  "forwardPorts": [8080, 8079, 8091],
+  "portsAttributes": {
+    "8080": { "label": "nginx gateway",   "onAutoForward": "silent" },
+    "8091": { "label": "REST API",        "onAutoForward": "silent" },
+    "8079": { "label": "MCP server",      "onAutoForward": "silent" }
+  },
+  "postStartCommand": "/entrypoint.sh",
+  "remoteUser": "root",
+  "containerEnv": {
+    "SANDBOX_BASE_URL": "http://localhost:8091"
+  }
+}

@@ -5,6 +5,11 @@
 A lean, MCP-native Docker environment for AI agents.
 **Not** a desktop. **Not** a browser. A tool surface.
 
+Image size: ~820MB uncompressed (Ubuntu 22.04 + Vault CLI + mcp[cli] dep tree).
+The old agent-sandbox was 2.5GB+ — this is a 3× reduction.
+Further reduction is possible by switching base to python:3.12-slim (drops ~300MB)
+and using `mcp` without `[cli]` extras. Tracked for v0.2.
+
 Two interfaces to the same container:
 - **MCP** (port 8079, streamable-HTTP) — agent-native, rich tooling, process management
 - **REST API** (port 8091) — simple, scriptable, SDK-backed

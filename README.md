@@ -2,7 +2,8 @@
 
 A lean, MCP-native Docker environment for AI agents.
 
-**~150MB image. No VNC. No browser. No desktop. Pure tool surface.**
+**No VNC. No browser. No desktop. Pure tool surface.**
+Image: ~820MB uncompressed (3× smaller than agent-sandbox). Roadmap: python:3.12-slim base → ~500MB.
 
 ```
 ┌─────────────────────────────────────────────────────┐

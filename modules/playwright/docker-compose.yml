@@ -32,6 +32,8 @@ services:
       - "chromium"
       - "--user-data-dir"
       - "/home/pwuser/.playwright/profile"
+      - "--storage-state"
+      - "/home/pwuser/.playwright/auth.json"
     environment:
       # headed: set to false for headless automation after first manual login
       - PLAYWRIGHT_MCP_HEADED=${PLAYWRIGHT_HEADED:-false}
@@ -43,7 +45,7 @@ services:
       - sandbox-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8080/mcp"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/mcp || true"]
       interval: 10s
       timeout: 5s
       retries: 5
